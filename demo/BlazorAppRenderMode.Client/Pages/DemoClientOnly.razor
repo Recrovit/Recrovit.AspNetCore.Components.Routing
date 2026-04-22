@@ -1,0 +1,7 @@
+﻿@page "/demo-clientonly"
+@attribute [RecrovitPageRoute(RecrovitRouteMode.ClientOnly, LayoutType = typeof(ClientOnlyLayout))]
+
+<PageTitle>Client Only</PageTitle>
+
+<RenderModeShowcase Title="Client Only"
+                    Description="This sample page runs only in WebAssembly mode without prerendering, so it gets a dedicated ClientOnly layout." />

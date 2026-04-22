@@ -1,0 +1,103 @@
+@namespace Recrovit.AspNetCore.Components.Routing
+
+<CascadingValue Name="RecrovitCurrentPageRouteDefinition" Value="Context.Definition">
+    <CascadingValue Name="RecrovitCurrentRouteMode" Value="Context.Definition.RouteMode">
+        @if (FoundContent is not null)
+        {
+            @FoundContent(Context)
+        }
+        else
+        {
+            @Context.DefaultContent
+        }
+    </CascadingValue>
+</CascadingValue>
+
+@code {
+    [Parameter, EditorRequired]
+    public RouteData RouteData { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public RecrovitPageRouteDefinition Definition { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public IRecrovitLayoutResolver LayoutResolver { get; set; } = default!;
+
+    [Parameter]
+    public Type? DefaultLayout { get; set; }
+
+    [Parameter]
+    public string FocusSelector { get; set; } = "h1";
+
+    [Parameter]
+    public RecrovitRoutesKind Kind { get; set; }
+
+    [Parameter]
+    public RenderFragment<RecrovitFoundContentContext>? FoundContent { get; set; }
+
+    private RecrovitFoundContentContext? _context;
+
+    private RecrovitFoundContentContext Context
+        => _context ?? throw new InvalidOperationException("Found content context has not been initialized.");
+
+    protected override void OnParametersSet()
+    {
+        if (_context is null
+            || !ReferenceEquals(_context.RouteData, RouteData)
+            || _context.Definition != Definition
+            || _context.FocusSelector != FocusSelector
+            || _context.Kind != Kind)
+        {
+            _context = new(
+                RouteData,
+                Definition,
+                FocusSelector,
+                Kind,
+                HandleLayoutOverrideChanged);
+        }
+
+        RefreshResolvedContent();
+    }
+
+    private void HandleLayoutOverrideChanged()
+    {
+        if (_context is null)
+        {
+            return;
+        }
+
+        RefreshResolvedContent();
+        _ = InvokeAsync(StateHasChanged);
+    }
+
+    private void RefreshResolvedContent()
+    {
+        var resolvedLayout = ResolveLayout(Context.GetLayoutOverrideDefinition());
+
+        Context.SetResolvedContent(
+            resolvedLayout,
+            builder =>
+            {
+                builder.OpenComponent<RouteView>(0);
+                builder.AddAttribute(1, nameof(RouteView.RouteData), RouteData);
+                builder.AddAttribute(2, nameof(RouteView.DefaultLayout), resolvedLayout);
+                builder.CloseComponent();
+
+                builder.OpenComponent<FocusOnNavigate>(3);
+                builder.AddAttribute(4, nameof(FocusOnNavigate.RouteData), RouteData);
+                builder.AddAttribute(5, nameof(FocusOnNavigate.Selector), FocusSelector);
+                builder.CloseComponent();
+            });
+    }
+
+    private Type? ResolveLayout(RecrovitPageRouteDefinition definition)
+    {
+        var context = new RecrovitLayoutResolverContext(
+            RouteData.PageType,
+            definition,
+            DefaultLayout,
+            RouteData);
+
+        return LayoutResolver.ResolveLayout(context);
+    }
+}

@@ -1,0 +1,68 @@
+@using System.Reflection
+
+@namespace Recrovit.AspNetCore.Components.Routing
+
+<Router AppAssembly="ResolvedAppAssembly"
+        AdditionalAssemblies="ResolvedAdditionalAssemblies"
+        NotFoundPage="ResolvedNotFoundPage">
+    <Found Context="routeData">
+        <RecrovitFoundContentHost RouteData="routeData"
+                                  Definition="PageRouteDefinitionResolver.GetDefinition(routeData.PageType)"
+                                  LayoutResolver="LayoutResolver"
+                                  DefaultLayout="ResolvedDefaultLayout"
+                                  FocusSelector="@FocusSelector"
+                                  Kind="Kind"
+                                  FoundContent="ResolvedFoundContent" />
+    </Found>
+</Router>
+
+@inject IRecrovitPageRouteDefinitionResolver PageRouteDefinitionResolver
+@inject IRecrovitLayoutResolver LayoutResolver
+@inject IOptions<RecrovitRoutingOptions> RoutingOptionsAccessor
+@code {
+    [Parameter, EditorRequired]
+    public RecrovitRoutesKind Kind { get; set; }
+
+    [Parameter]
+    public Assembly? AppAssembly { get; set; }
+
+    [Parameter]
+    public IEnumerable<Assembly>? AdditionalAssemblies { get; set; }
+
+    [Parameter]
+    public Type? DefaultLayout { get; set; }
+
+    [Parameter]
+    public Type? NotFoundPage { get; set; }
+
+    [Parameter]
+    public string FocusSelector { get; set; } = "h1";
+
+    [Parameter]
+    public RenderFragment<RecrovitFoundContentContext>? FoundContent { get; set; }
+
+    private RecrovitRoutingOptions RoutingOptions => RoutingOptionsAccessor.Value;
+
+    private Assembly ResolvedAppAssembly
+        => AppAssembly
+            ?? RoutingOptions.RouteAssemblies.FirstOrDefault()
+            ?? throw new InvalidOperationException(
+                "RecrovitRoutes requires an AppAssembly parameter or a registered route assembly.");
+
+    private IEnumerable<Assembly> ResolvedAdditionalAssemblies
+        => RoutingOptions.RouteAssemblies
+            .Concat(AdditionalAssemblies ?? [])
+            .Where(static assembly => assembly is not null)
+            .Distinct()
+            .Where(assembly => assembly != ResolvedAppAssembly)
+            .ToArray();
+
+    private Type? ResolvedNotFoundPage
+        => NotFoundPage ?? RoutingOptions.GetNotFoundPage(Kind);
+
+    private Type? ResolvedDefaultLayout
+        => DefaultLayout ?? RoutingOptions.DefaultLayout;
+
+    private RenderFragment<RecrovitFoundContentContext>? ResolvedFoundContent
+        => FoundContent ?? RoutingOptions.GetFoundContent(Kind);
+}

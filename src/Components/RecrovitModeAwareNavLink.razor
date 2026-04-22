@@ -1,0 +1,77 @@
+@namespace Recrovit.AspNetCore.Components.Routing
+
+@if (RequiresFullReload)
+{
+    <a href="@Href"
+       class="@ForceLoadCssClass"
+       data-enhance-nav="false"
+       @onclick="HandleForceLoadNavigation"
+       @onclick:preventDefault="true">
+        @ChildContent
+    </a>
+}
+else
+{
+    <NavLink href="@Href"
+             class="mode-nav-link"
+             ActiveClass="active"
+             Match="Match"
+             data-enhance-nav="@EnhancedNavigationValue">
+        @ChildContent
+    </NavLink>
+}
+
+@inject RecrovitRouteModeResolver RecrovitRouteModeResolver
+@inject IRecrovitReloadPolicy RecrovitReloadPolicy
+@code {
+    [CascadingParameter(Name = "RecrovitCurrentRouteMode")]
+    public RecrovitRouteMode CurrentRouteMode { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Href { get; set; } = string.Empty;
+
+    [Parameter]
+    public NavLinkMatch Match { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private RecrovitPageRouteDefinition TargetPageDefinition
+        => RecrovitRouteModeResolver.Resolve(Href);
+
+    private bool RequiresFullReload
+        => RecrovitReloadPolicy.RequiresFullReload(CurrentRouteMode, TargetPageDefinition.RouteMode);
+
+    private string ForceLoadCssClass
+        => IsCurrentTarget() ? "mode-nav-link active" : "mode-nav-link";
+
+    private string? EnhancedNavigationValue
+        => RequiresFullReload ? "false" : null;
+
+    private void HandleForceLoadNavigation(MouseEventArgs _)
+        => NavigationManagerInstance.NavigateTo(Href, forceLoad: true);
+
+    private bool IsCurrentTarget()
+    {
+        var currentPath = NormalizePath(GetCurrentPath());
+        var targetPath = NormalizePath(Href);
+
+        return Match == NavLinkMatch.All
+            ? currentPath == targetPath
+            : currentPath == targetPath || currentPath.StartsWith($"{targetPath}/", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string GetCurrentPath()
+    {
+        var uri = new Uri(NavigationManagerInstance.Uri, UriKind.Absolute);
+        return uri.AbsolutePath;
+    }
+
+    private static string NormalizePath(string? value)
+        => string.IsNullOrWhiteSpace(value)
+            ? string.Empty
+            : value.Trim().Trim('/').ToLowerInvariant();
+
+    [Inject]
+    private NavigationManager NavigationManagerInstance { get; set; } = default!;
+}

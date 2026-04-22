@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".github/workflows/dotnet-build-and-test.yml" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="demo/BlazorAppRenderMode.Client/BlazorAppRenderMode.Client.csproj" />
+  <Project Path="demo/BlazorAppRenderMode/BlazorAppRenderMode.csproj" />
+  <Project Path="src/Recrovit.AspNetCore.Components.Routing.csproj" />
+  <Project Path="tests/Recrovit.AspNetCore.Components.Routing.Tests/Recrovit.AspNetCore.Components.Routing.Tests.csproj" />
+</Solution>

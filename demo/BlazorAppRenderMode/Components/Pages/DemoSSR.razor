@@ -1,0 +1,9 @@
+﻿@page "/"
+@page "/dashboard"
+@attribute [ExcludeFromInteractiveRouting]
+@attribute [RecrovitPageRoute(RecrovitRouteMode.StaticServer, LayoutType = typeof(AppLayout))]
+
+<PageTitle>SSR</PageTitle>
+
+<RenderModeShowcase Title="SSR"
+                    Description="This page runs as a static SSR page in the app project, so it is excluded from interactive routing." />

@@ -1,0 +1,26 @@
+.mode-nav {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.mode-nav ::deep .mode-nav-link {
+    display: block;
+    padding: 0.9rem 1rem;
+    border-radius: 14px;
+    color: rgba(255, 255, 255, 0.82);
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.05);
+    transition: background-color 120ms ease, transform 120ms ease, color 120ms ease;
+}
+
+.mode-nav ::deep .mode-nav-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateX(2px);
+}
+
+.mode-nav ::deep .mode-nav-link.active {
+    color: #102846;
+    background: #f7f9fc;
+    font-weight: 600;
+}

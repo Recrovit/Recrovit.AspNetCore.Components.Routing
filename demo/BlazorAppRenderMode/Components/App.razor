@@ -1,0 +1,49 @@
+﻿@using Recrovit.AspNetCore.Components.Routing.Configuration
+@using Recrovit.AspNetCore.Components.Routing.Models
+@using Recrovit.AspNetCore.Components.Routing.Resolution
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <ResourcePreloader />
+    <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
+    <link rel="stylesheet" href="@Assets["app.css"]" />
+    <link rel="stylesheet" href="@Assets["BlazorAppRenderMode.styles.css"]" />
+    <ImportMap />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <HeadOutlet @rendermode="CurrentRenderMode" />
+</head>
+
+<body>
+    @if (CurrentPageDefinition.RouteMode is RecrovitRouteMode.StaticServer or RecrovitRouteMode.InteractiveServer)
+    {
+        <RecrovitRoutes @rendermode="CurrentRenderMode" Kind="RecrovitRoutesKind.Host" />
+        @if (CurrentPageDefinition.RouteMode == RecrovitRouteMode.InteractiveServer)
+        {
+            <ReconnectModal />
+        }
+    }
+    else
+    {
+        <BlazorAppRenderMode.Client.Routes @rendermode="CurrentRenderMode" />
+    }
+    <script src="@Assets["_framework/blazor.web.js"]"></script>
+</body>
+
+</html>
+
+@inject RecrovitRouteModeResolver RecrovitRouteModeResolver
+@code {
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private RecrovitPageRouteDefinition CurrentPageDefinition
+        => RecrovitRouteModeResolver.Resolve(HttpContext?.Request.Path.Value);
+
+    private IComponentRenderMode? CurrentRenderMode
+        => RecrovitRouteModeMapper.GetDefaultTopLevelRenderMode(CurrentPageDefinition.RouteMode);
+}

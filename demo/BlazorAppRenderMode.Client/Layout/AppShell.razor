@@ -1,0 +1,47 @@
+@namespace BlazorAppRenderMode.Client
+
+<div class="app-shell @VariantClass">
+    <aside class="app-shell__sidebar">
+        <div class="app-shell__brand">
+            <p class="app-shell__kicker">@SectionLabel</p>
+            <h2>Blazor Render Modes</h2>
+            <p>@SectionSummary</p>
+        </div>
+
+        <NavMenu />
+    </aside>
+
+    <main class="app-shell__main">
+        <div class="app-shell__topbar">
+            <div>
+                <p class="app-shell__kicker">Active layout</p>
+                <strong>@SectionLabel</strong>
+            </div>
+            <a href="https://learn.microsoft.com/aspnet/core/blazor/" target="_blank" rel="noreferrer">Blazor docs</a>
+        </div>
+
+        <article class="app-shell__content">
+            @ChildContent
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string SectionLabel { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public string SectionSummary { get; set; } = string.Empty;
+
+    [Parameter]
+    public string VariantClass { get; set; } = "app-shell--default";
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

@@ -1,0 +1,63 @@
+@namespace BlazorAppRenderMode.Client
+@using BlazorAppRenderMode.Client.Configuration
+@using Recrovit.AspNetCore.Components.Routing.Configuration
+@using Recrovit.AspNetCore.Components.Routing.Models
+
+<section class="mode-card">
+    <header class="mode-card__header">
+        <p class="mode-card__eyebrow">Render mode rule</p>
+        <h1>@Title</h1>
+        <p class="mode-card__lede">@Description</p>
+    </header>
+
+    <dl class="mode-card__grid">
+        <div>
+            <dt>Category</dt>
+            <dd>@Content.RouteModeLabel</dd>
+        </div>
+        <div>
+            <dt>Declared top-level mode</dt>
+            <dd>@RecrovitRouteModeMapper.GetAssignedModeLabel(RecrovitRouteModeMapper.GetDefaultTopLevelRenderMode(Definition.RouteMode))</dd>
+        </div>
+        <div>
+            <dt>Current component mode</dt>
+            <dd>@RecrovitRouteModeMapper.GetAssignedModeLabel(AssignedRenderMode)</dd>
+        </div>
+        <div>
+            <dt>Current runtime</dt>
+            <dd>@RecrovitRouteModeMapper.GetRuntimeLabel(RendererInfo)</dd>
+        </div>
+        <div>
+            <dt>Declared layout</dt>
+            <dd>@GetLayoutLabel(Definition.LayoutType)</dd>
+        </div>
+        <div>
+            <dt>Rule</dt>
+            <dd>@Content.RuleTitle</dd>
+        </div>
+    </dl>
+
+    <p class="mode-card__rule">@Content.RuleSummary</p>
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public string Description { get; set; } = string.Empty;
+
+    [CascadingParameter(Name = "RecrovitCurrentPageRouteDefinition")]
+    public RecrovitPageRouteDefinition? CurrentDefinition { get; set; }
+
+    private RecrovitPageRouteDefinition Definition
+        => CurrentDefinition ?? RecrovitRouteModeMapper.CreateDefaultFallbackDefinition();
+
+    private DemoRouteModeContent Content
+        => CurrentDefinition is null
+            ? DemoRouteModeContentMapper.GetFallbackContent()
+            : DemoRouteModeContentMapper.GetContent(Definition.RouteMode);
+
+    private static string GetLayoutLabel(Type? layoutType)
+        => layoutType?.Name ?? "Default layout fallback";
+}
