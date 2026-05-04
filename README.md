@@ -1,5 +1,5 @@
 # Recrovit.AspNetCore.Components.Routing
-[![NuGet Version](https://img.shields.io/nuget/v/Recrovit.AspNetCore.Components.Routing.svg)](https://www.nuget.org/packages/Recrovit.AspNetCore.Components.RoutingCore/)
+[![NuGet Version](https://img.shields.io/nuget/v/Recrovit.AspNetCore.Components.Routing.svg?label=Latest%20release)](https://www.nuget.org/packages/Recrovit.AspNetCore.Components.Routing/)
 
 This repository contains the source code, tests, and demo application for the `Recrovit.AspNetCore.Components.Routing` Blazor package.
 
