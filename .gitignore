@@ -427,7 +427,8 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
+**/AGENTS.md*
+/.codex-logs
+
 **/appsettings.*.json
 src/Directory.Build.targets
-.github/copilot-instructions.md
-
