@@ -2,6 +2,16 @@
 
 This file contains the release history for `Recrovit.AspNetCore.Components.Routing`.
 
+## [Unreleased]
+
+### Features Added
+
+- Configure the route mode and layout of an existing page type from application startup.
+
+### Bugs Fixed
+
+- Resolve routes when a trailing optional parameter is omitted.
+
 ## [10.0.0] - 2026-04-22
 
 - Initial release

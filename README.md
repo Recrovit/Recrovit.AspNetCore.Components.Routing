@@ -15,7 +15,7 @@ The repository exists to develop and demonstrate a set of Blazor routing compone
 
 ## How does it work?
 
-The solution builds on top of Blazor's built-in router. Routable components receive a route mode and an optional layout through a custom attribute, and the `RecrovitRoutes` component renders the page according to the resolved route definition. Navigation can be aligned with the target page's runtime mode through `RecrovitModeAwareNavLink`, which triggers a full reload when necessary.
+The solution builds on top of Blazor's built-in router. Application configuration or a page attribute can assign a route mode and layout. The `RecrovitRoutes` component renders the page according to the resolved route definition. `RecrovitModeAwareNavLink` triggers a full reload when navigation crosses runtime modes.
 
 The intended composition is demonstrated in [demo/BlazorAppRenderMode](demo/BlazorAppRenderMode), where the host application selects a top-level render mode from the current route, and client-side navigation follows that choice.
 
@@ -100,7 +100,21 @@ Supported route modes:
 
 `ClientOnly` maps to `InteractiveWebAssemblyRenderMode(prerender: false)`.
 
-If a page has no `RecrovitPageRouteAttribute`, or a path does not match any discovered route template, the default fallback definition is `StaticServer` with no explicit layout. You can replace that fallback through `RecrovitRoutingOptions.FallbackDefinition`.
+The default resolver uses an explicit page configuration first, then the page's `RecrovitPageRouteAttribute`, then `FallbackDefinition`. The fallback also applies when the path does not match a discovered route. It defaults to `StaticServer` with no explicit layout.
+
+### Configure an existing page type
+
+Use `ConfigurePage<TPage>` to set the route mode and layout for every route of a page, including pages supplied by a component library.
+
+```csharp
+builder.Services.AddRecrovitComponentRouting(options =>
+{
+    options.AddRouteAssembly(typeof(ReportsPage).Assembly);
+    options.ConfigurePage<ReportsPage>(RecrovitRouteMode.ClientOnly, typeof(ReportsLayout));
+});
+```
+
+In a hosted Blazor WebAssembly app, apply the configuration in both the host and client. Register the library assembly with Razor Components endpoints on the host as well. The server-side mode resolver and the Blazor router use the same page definition.
 
 ## Configuration and extensibility
 

@@ -13,6 +13,11 @@ internal sealed class DefaultRecrovitPageRouteDefinitionResolver(IOptions<Recrov
 
     public RecrovitPageRouteDefinition GetDefinition(Type pageType)
     {
+        if (_options.GetConfiguredPage(pageType) is { } configuredDefinition)
+        {
+            return configuredDefinition;
+        }
+
         var attribute = pageType.GetCustomAttributes(typeof(RecrovitPageRouteAttribute), inherit: false)
             .OfType<RecrovitPageRouteAttribute>()
             .SingleOrDefault();

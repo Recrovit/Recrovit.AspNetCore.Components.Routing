@@ -1,7 +1,7 @@
-using System.Reflection;
 using Microsoft.AspNetCore.Components;
 using Recrovit.AspNetCore.Components.Routing.Abstractions;
 using Recrovit.AspNetCore.Components.Routing.Models;
+using System.Reflection;
 
 namespace Recrovit.AspNetCore.Components.Routing.Resolution;
 
@@ -18,7 +18,8 @@ public sealed class RecrovitRouteModeResolver
         _entries = assemblies
             .Distinct()
             .SelectMany(GetRouteEntries)
-            .OrderByDescending(static entry => entry.SegmentCount)
+            .OrderBy(static entry => entry.OmittedOptionalSegments)
+            .ThenByDescending(static entry => entry.SegmentCount)
             .ThenByDescending(static entry => entry.LiteralSegmentCount)
             .ToArray();
     }
@@ -54,11 +55,15 @@ public sealed class RecrovitRouteModeResolver
             {
                 var template = NormalizeTemplate(routeAttribute.Template);
 
-                yield return new RouteEntry(
-                    template,
-                    definition,
-                    CountSegments(template),
-                    CountLiteralSegments(template));
+                yield return new RouteEntry(template, definition, 0);
+
+                var omittedOptionalSegments = 0;
+                while (RouteEntry.IsOptionalParameterSegment(template[(template.LastIndexOf('/') + 1)..]))
+                {
+                    var separator = template.LastIndexOf('/');
+                    template = separator < 0 ? string.Empty : template[..separator];
+                    yield return new RouteEntry(template, definition, ++omittedOptionalSegments);
+                }
             }
         }
     }
@@ -78,24 +83,14 @@ public sealed class RecrovitRouteModeResolver
             ? string.Empty
             : template.Trim().Trim('/').ToLowerInvariant();
 
-    private static int CountSegments(string template)
-        => string.IsNullOrEmpty(template)
-            ? 0
-            : template.Split('/', StringSplitOptions.RemoveEmptyEntries).Length;
-
-    private static int CountLiteralSegments(string template)
-        => string.IsNullOrEmpty(template)
-            ? 0
-            : template.Split('/', StringSplitOptions.RemoveEmptyEntries)
-                .Count(static segment => !RouteEntry.IsParameterSegment(segment));
-
     private sealed record RouteEntry(
         string Template,
         RecrovitPageRouteDefinition Definition,
-        int SegmentCount,
-        int LiteralSegmentCount)
+        int OmittedOptionalSegments)
     {
         private string[] TemplateSegments { get; } = GetSegments(Template);
+        public int SegmentCount => TemplateSegments.Length;
+        public int LiteralSegmentCount => TemplateSegments.Count(static segment => !IsParameterSegment(segment));
 
         public bool IsMatch(string requestPath)
         {
@@ -132,7 +127,10 @@ public sealed class RecrovitRouteModeResolver
             return string.Equals(templateSegment, requestSegment, StringComparison.OrdinalIgnoreCase);
         }
 
-        internal static bool IsParameterSegment(string segment)
+        private static bool IsParameterSegment(string segment)
             => segment.StartsWith('{') && segment.EndsWith('}');
+
+        internal static bool IsOptionalParameterSegment(string segment)
+            => segment.StartsWith('{') && segment.EndsWith("?}", StringComparison.Ordinal);
     }
 }

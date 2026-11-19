@@ -50,8 +50,13 @@ public sealed class StaticServerPage : RouteProbePageBase;
 public sealed class InteractiveServerPage : RouteProbePageBase;
 
 [Route("/wasm-probe")]
+[Route("/optional/{EntityName?}")]
 [RecrovitPageRoute(RecrovitRouteMode.InteractiveWebAssembly)]
-public sealed class InteractiveWebAssemblyPage : RouteProbePageBase;
+public sealed class InteractiveWebAssemblyPage : RouteProbePageBase
+{
+    [Parameter]
+    public string? EntityName { get; set; }
+}
 
 [Route("/auto-probe")]
 [RecrovitPageRoute(RecrovitRouteMode.InteractiveAuto)]

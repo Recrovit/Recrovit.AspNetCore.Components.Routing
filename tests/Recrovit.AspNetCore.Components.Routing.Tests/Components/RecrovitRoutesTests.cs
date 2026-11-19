@@ -29,6 +29,19 @@ public sealed class RecrovitRoutesTests : BunitContext
     }
 
     [Fact]
+    public void ConfiguredPage_ShouldRenderInConfiguredModeAndLayout()
+    {
+        Services.PostConfigure<RecrovitRoutingOptions>(options =>
+            options.ConfigurePage<StaticServerPage>(RecrovitRouteMode.ClientOnly, typeof(OverrideProbeLayout)));
+        NavigateTo("http://localhost/probe");
+
+        var cut = Render<RecrovitRoutes>(parameters => parameters
+            .Add(component => component.Kind, RecrovitRoutesKind.Client));
+
+        AssertRouteModeMarkup(cut, "ClientOnly", "ClientOnly", "override-layout");
+    }
+
+    [Fact]
     public void WithoutAnyRouteAssembly_ShouldThrowComponentError()
     {
         Services.Clear();
